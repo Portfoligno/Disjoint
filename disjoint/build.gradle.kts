@@ -13,7 +13,7 @@ tasks["jar"].doLast {
 }
 
 dependencies {
-  implementation(kotlinStandardLibrary())
+  api(kotlinStandardLibrary())
   api(platform(kotlin("bom")))
   api(platform("com.fasterxml.jackson:jackson-bom:2.12.1"))
 
