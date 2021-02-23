@@ -1,5 +1,7 @@
 package io.github.portfoligno.json.disjoint.test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.TypeToken;
 import io.github.portfoligno.jackson.scalar.StrictScalarModule;
@@ -10,6 +12,8 @@ import io.github.portfoligno.json.disjoint.test.utility.StringSpec;
 
 import java.util.List;
 
+import static com.fasterxml.jackson.databind.MapperFeature.ALLOW_COERCION_OF_SCALARS;
+import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -34,4 +38,15 @@ public class DisjointJavaSpec extends StringSpec {{
     Disjoint.unresolved(5),
     Disjoint.swap(Disjoint.left(5))
   ));
+  describe("README example should work", () -> {
+    ObjectMapper m = new ObjectMapper().registerModule(new StrictScalarModule());
+    out.println(m.readValue("\"hello\"", new TypeReference<Disjoint<Integer, String>>() { })); // right(hello)
+    out.println(m.readValue("1.5", new TypeReference<Disjoint<Integer, Double>>() { })); // right(1.5)
+    out.println(m.readValue("1.0", new TypeReference<Disjoint<Integer, Double>>() { })); // left(1)
+
+    // Without `StrictScalarModule`
+    ObjectMapper m1 = new ObjectMapper().configure(ALLOW_COERCION_OF_SCALARS, false);
+    out.println(m1.readValue("1.5", new TypeReference<Disjoint<Integer, Double>>() { })); // left(1)
+    out.println(m1.readValue("1.0", new TypeReference<Disjoint<Integer, Double>>() { })); // left(1)
+  });
 }}
