@@ -1,13 +1,13 @@
-@file:Suppress("MemberVisibilityCanBePrivate", "UnstableApiUsage")
+@file:Suppress("MemberVisibilityCanBePrivate")
 package io.github.portfoligno.json.disjoint
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.google.common.reflect.TypeToken
 import io.github.portfoligno.json.disjoint.codec.DisjointCodec
 import io.github.portfoligno.json.disjoint.codec.DisjointDeserializer
 import io.github.portfoligno.json.disjoint.codec.DisjointSerializer
 import io.github.portfoligno.json.disjoint.utility.JvmPackagePrivate
+import io.github.portfoligno.json.disjoint.utility.typeTokenOf
 import io.github.portfoligno.json.disjoint.utility.jvmPackagePrivateWarning as w
 import kotlin.Deprecated as D
 
@@ -16,7 +16,7 @@ import kotlin.Deprecated as D
 sealed class DisjointSource<out A, out B> {
   class Unresolved<B> @D(w) @JvmPackagePrivate internal constructor (val value: B) : DisjointSource<Nothing, B>() {
     inline fun <reified A : Any> resolveWith(codec: DisjointCodec) =
-        codec.resolve(this, object : TypeToken<A>() { })
+        codec.resolve(this, typeTokenOf<A>())
 
     override fun hashCode() = 0x19085cbf + value.hashCode()
     override fun equals(other: Any?) = other is Unresolved<*> && value == other.value
@@ -98,7 +98,7 @@ sealed class Disjoint<A : Any, out B> : DisjointSource<A, B>() {
     fun <A : Any, B> left(value: A): Disjoint<A, B> = (Left)(value)
 
     inline fun <reified A : Any, B> DisjointSource<A, B>.resolveWith(codec: DisjointCodec) =
-        codec.resolveSource(this, object : TypeToken<A>() { })
+        codec.resolveSource(this, typeTokenOf())
 
     @JvmStatic
     val <A> DisjointSource<A, A>.value

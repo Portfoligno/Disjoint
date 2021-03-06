@@ -1,13 +1,12 @@
-@file:Suppress("UnstableApiUsage")
 package io.github.portfoligno.json.disjoint.codec
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.common.reflect.TypeToken
 import io.github.portfoligno.json.disjoint.Disjoint
 import io.github.portfoligno.json.disjoint.Disjoint.Left
 import io.github.portfoligno.json.disjoint.Disjoint.Right
 import io.github.portfoligno.json.disjoint.DisjointSource
 import io.github.portfoligno.json.disjoint.DisjointSource.Unresolved
+import io.github.portfoligno.json.disjoint.utility.TypeToken
 
 interface DisjointCodec {
   fun <T : Any> convertOrNull(value: Any?, type: TypeToken<T>): T?
