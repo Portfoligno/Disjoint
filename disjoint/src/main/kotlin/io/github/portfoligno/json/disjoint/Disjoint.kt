@@ -13,8 +13,8 @@ import kotlin.Deprecated as D
 
 @JsonDeserialize(using = DisjointDeserializer::class)
 @JsonSerialize(using = DisjointSerializer::class)
-sealed class DisjointSource<out A, out B> {
-  class Unresolved<B> @D(w) @JvmPackagePrivate internal constructor (val value: B) : DisjointSource<Nothing, B>() {
+sealed class DisjointSource<out A : Any, out B : Any> {
+  class Unresolved<B : Any> @D(w) @JvmPackagePrivate internal constructor (val value: B) : DisjointSource<Nothing, B>() {
     inline fun <reified A : Any> resolveWith(codec: DisjointCodec) =
         codec.resolve(this, typeTokenOf<A>())
 
@@ -25,31 +25,31 @@ sealed class DisjointSource<out A, out B> {
     companion object {
       @JvmStatic
       @JvmName("of")
-      operator fun <B> invoke(value: B) = Unresolved(value)
+      operator fun <B : Any> invoke(value: B) = Unresolved(value)
     }
   }
 }
 
-sealed class Disjoint<A : Any, out B> : DisjointSource<A, B>() {
+sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
   abstract val left: A?
   abstract val right: B?
 
   abstract fun <R> fold(leftTransform: (A) -> R, rightTransform: (B) -> R): R
-  abstract fun <R> mapRight(transform: (B) -> R): DisjointSource<A, R>
+  abstract fun <R : Any> mapRight(transform: (B) -> R): DisjointSource<A, R>
   abstract fun <R : Any> mapLeft(transform: (A) -> R): DisjointSource<R, B>
-  abstract fun <R : Any, S> bimap(leftTransform: (A) -> R, rightTransform: (B) -> S): DisjointSource<R, S>
+  abstract fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (B) -> S): DisjointSource<R, S>
 
-  class Right<A : Any, B> @D(w) @JvmPackagePrivate internal constructor (val value: B) : Disjoint<A, B>() {
+  class Right<A : Any, B : Any> @D(w) @JvmPackagePrivate internal constructor (val value: B) : Disjoint<A, B>() {
     override val left: Nothing? get() = null
     override val right get() = value
 
     override fun <R> fold(leftTransform: (A) -> R, rightTransform: (B) -> R) =
         rightTransform(value)
-    override fun <R> mapRight(transform: (B) -> R) =
+    override fun <R : Any> mapRight(transform: (B) -> R) =
         Unresolved(transform(value))
     override fun <R : Any> mapLeft(transform: (A) -> R) =
         Unresolved(value)
-    override fun <R : Any, S> bimap(leftTransform: (A) -> R, rightTransform: (B) -> S) =
+    override fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (B) -> S) =
         Unresolved(rightTransform(value))
 
     override fun hashCode() = 0x6c49acc3 + right.hashCode()
@@ -59,7 +59,7 @@ sealed class Disjoint<A : Any, out B> : DisjointSource<A, B>() {
     companion object {
       @JvmSynthetic
       internal
-      operator fun <A : Any, B> invoke(value: B) = Right<A, B>(value)
+      operator fun <A : Any, B : Any> invoke(value: B) = Right<A, B>(value)
     }
   }
 
@@ -69,11 +69,11 @@ sealed class Disjoint<A : Any, out B> : DisjointSource<A, B>() {
 
     override fun <R> fold(leftTransform: (A) -> R, rightTransform: (Nothing) -> R) =
         leftTransform(value)
-    override fun <R> mapRight(transform: (Nothing) -> R) =
+    override fun <R : Any> mapRight(transform: (Nothing) -> R) =
         this
     override fun <R : Any> mapLeft(transform: (A) -> R) =
         (Left)(transform(value))
-    override fun <R : Any, S> bimap(leftTransform: (A) -> R, rightTransform: (Nothing) -> S) =
+    override fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (Nothing) -> S) =
         (Left)(leftTransform(value))
 
     override fun hashCode() = 0x60fc3c14 + left.hashCode()
@@ -92,16 +92,16 @@ sealed class Disjoint<A : Any, out B> : DisjointSource<A, B>() {
     val Unresolved get() = DisjointSource.Unresolved
 
     @JvmStatic
-    fun <A, B> unresolved(value: B): DisjointSource<A, B> = Unresolved(value)
+    fun <A : Any, B : Any> unresolved(value: B): DisjointSource<A, B> = Unresolved(value)
 
     @JvmStatic
-    fun <A : Any, B> left(value: A): Disjoint<A, B> = (Left)(value)
+    fun <A : Any, B : Any> left(value: A): Disjoint<A, B> = (Left)(value)
 
-    inline fun <reified A : Any, B> DisjointSource<A, B>.resolveWith(codec: DisjointCodec) =
+    inline fun <reified A : Any, B : Any> DisjointSource<A, B>.resolveWith(codec: DisjointCodec) =
         codec.resolveSource(this, typeTokenOf())
 
     @JvmStatic
-    val <A> DisjointSource<A, A>.value
+    val <A : Any> DisjointSource<A, A>.value
       get() = when (this) {
         is Left -> value
         is Right -> value

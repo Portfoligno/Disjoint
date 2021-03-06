@@ -4,7 +4,10 @@ package io.github.portfoligno.json.disjoint.codec
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.TreeNode
-import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.BeanProperty
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JavaType
+import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import com.fasterxml.jackson.databind.util.TokenBuffer
 import io.github.portfoligno.json.disjoint.Disjoint
@@ -17,25 +20,25 @@ fun JsonDeserializer<*>.throwInputMismatch(context: DeserializationContext, mess
 
 @JvmPackagePrivate
 internal
-class DisjointDeserializer : JsonDeserializer<Disjoint<Any, Any?>>(), ContextualDeserializer {
+class DisjointDeserializer : JsonDeserializer<Disjoint<Any, Any>>(), ContextualDeserializer {
   override
   fun createContextual(ctxt: DeserializationContext, property: BeanProperty?): JsonDeserializer<*> =
       when (val t = ctxt.contextualType) {
         null -> this
-        else -> object : JsonDeserializer<Disjoint<Any, Any?>>() {
+        else -> object : JsonDeserializer<Disjoint<Any, Any>>() {
           override
-          fun deserialize(p: JsonParser, ctxt: DeserializationContext): Disjoint<Any, Any?> =
+          fun deserialize(p: JsonParser, ctxt: DeserializationContext): Disjoint<Any, Any> =
               typedDeserialize(p, t, ctxt)
         }
       }
 
   override
-  fun deserialize(p: JsonParser, ctxt: DeserializationContext): Disjoint<Any, Any?> =
+  fun deserialize(p: JsonParser, ctxt: DeserializationContext): Disjoint<Any, Any> =
       ctxt.typeFactory.constructType(Any::class.java).let {
         createDisjoint(p, ctxt, it, it)
       }
 
-  fun typedDeserialize(p: JsonParser, contextualType: JavaType, context: DeserializationContext): Disjoint<Any, Any?> =
+  fun typedDeserialize(p: JsonParser, contextualType: JavaType, context: DeserializationContext): Disjoint<Any, Any> =
       contextualType.run {
         when (rawClass.kotlin) {
           Disjoint.Left::class ->
@@ -48,7 +51,7 @@ class DisjointDeserializer : JsonDeserializer<Disjoint<Any, Any?>>(), Contextual
       }
 
   private
-  fun <A : Any, B> createDisjoint(
+  fun <A : Any, B : Any> createDisjoint(
       p: JsonParser, context: DeserializationContext, leftType: JavaType, rightType: JavaType
   ): Disjoint<A, B> =
       TokenBuffer(p).deserialize(p, context).let { tokens ->
@@ -60,7 +63,7 @@ class DisjointDeserializer : JsonDeserializer<Disjoint<Any, Any?>>(), Contextual
       }
 
   private
-  fun <A : Any, B> createDisjointRight(
+  fun <A : Any, B : Any> createDisjointRight(
       p: JsonParser, context: DeserializationContext, leftType: JavaType, rightType: JavaType
   ): Disjoint<A, B> =
       TokenBuffer(p).deserialize(p, context).let { tokens ->
