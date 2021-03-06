@@ -31,6 +31,9 @@ class DisjointKotlinSpec : StringSpec({
   "Deserialization as `left` should work" {
     m.readValue<Disjoint<List<Int>, List<String>>>("[2, 2]").left shouldBe listOf(2, 2)
   }
+  "Deserialization targeted as `unresolved` should work" {
+    m.readValue<DisjointSource.Unresolved<List<Int>>>("[2, 2]").value shouldBe listOf(2, 2)
+  }
   "Deserialization of nested structure should work" {
     m.readValue<List<Disjoint<List<Int>, String>>>("""["2", [2]]""")[1] shouldBe Disjoint.left(listOf(2))
   }
