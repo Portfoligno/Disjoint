@@ -23,7 +23,6 @@ dependencies {
   testImplementation(project(":jackson-strict-scalar"))
 
   compileOnly("com.fasterxml.jackson.core", "jackson-databind")
-  implementation(guava())
 
   testImplementation("com.fasterxml.jackson.module", "jackson-module-kotlin")
 }

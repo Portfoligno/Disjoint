@@ -39,12 +39,6 @@ abstract class TypeToken<T : Any> private constructor (explicitType: Type? = nul
 
     @JvmStatic
     @JvmName("of")
-    @Suppress("UnstableApiUsage")
-    fun <T : Any> com.google.common.reflect.TypeToken<T>.toTypeToken(): TypeToken<T> =
-      SimpleTypeToken(type)
-
-    @JvmStatic
-    @JvmName("of")
     fun <T : Any> TypeReference<T>.toTypeToken(): TypeToken<T> =
         SimpleTypeToken(type)
   }
