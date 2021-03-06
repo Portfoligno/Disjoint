@@ -1,8 +1,10 @@
 @file:Suppress("BlockingMethodInNonBlockingContext")
 package io.github.portfoligno.json.disjoint.test
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.portfoligno.jackson.scalar.StrictScalarModule
 import io.github.portfoligno.json.disjoint.Disjoint
@@ -56,5 +58,15 @@ class DisjointKotlinSpec : StringSpec({
   }
   "Serialization from `left` should work" {
     m.writeValueAsString((Disjoint.Left)(10.0)) shouldBe "10.0"
+  }
+
+  "Deserialization as `left` of `NullNode` should work" {
+    m.readValue<Disjoint<JsonNode, Int>>("null").left shouldBe NullNode.instance
+  }
+  "Deserialization as `right` of `NullNode` should work" {
+    m.readValue<Disjoint<Int, JsonNode>>("null").right shouldBe NullNode.instance
+  }
+  "Deserialization as `null` should work" {
+    m.readValue<Disjoint<String, Int>>("null") shouldBe null
   }
 })

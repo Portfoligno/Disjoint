@@ -29,25 +29,29 @@ class DisjointDeserializer : JsonDeserializer<DisjointSource<Any, Any>>(), Conte
         else -> object : JsonDeserializer<DisjointSource<Any, Any>>() {
           override
           fun deserialize(p: JsonParser, ctxt: DeserializationContext): DisjointSource<Any, Any> =
-              typedDeserialize(p, t, ctxt)
+              typedDeserialize(p, t, ctxt)!!
+
+          override
+          fun getNullValue(ctxt: DeserializationContext): DisjointSource<Any, Any>? =
+              typedDeserialize(ctxt.parser, t, ctxt)
         }
       }
 
   override
   fun deserialize(p: JsonParser, ctxt: DeserializationContext): DisjointSource<Any, Any> =
       ctxt.typeFactory.constructType(Any::class.java).let {
-        createDisjoint(p, ctxt, it, it)
+        createDisjoint(p, ctxt, it, it)!!
       }
 
   fun typedDeserialize(
       p: JsonParser, contextualType: JavaType, context: DeserializationContext
-  ): DisjointSource<Any, Any> =
+  ): DisjointSource<Any, Any>? =
       contextualType.run {
         when (rawClass.kotlin) {
           DisjointSource.Unresolved::class ->
-            (DisjointSource.Unresolved)(p.codec.readValue(p, bindings.typeParameters[0]))
+            p.codec.readValue<Any?>(p, bindings.typeParameters[0])?.let { (DisjointSource.Unresolved)(it) }
           Disjoint.Left::class ->
-            (Disjoint.Left)(p.codec.readValue(p, bindings.typeParameters[0]))
+            p.codec.readValue<Any?>(p, bindings.typeParameters[0])?.let { (Disjoint.Left)(it) }
           Disjoint.Right::class ->
             createDisjointRight(p, context, bindings.typeParameters[0], bindings.typeParameters[1])
           else ->
@@ -58,26 +62,37 @@ class DisjointDeserializer : JsonDeserializer<DisjointSource<Any, Any>>(), Conte
   private
   fun <A : Any, B : Any> createDisjoint(
       p: JsonParser, context: DeserializationContext, leftType: JavaType, rightType: JavaType
-  ): Disjoint<A, B> =
+  ): Disjoint<A, B>? =
       TokenBuffer(p).deserialize(p, context).let { tokens ->
-        try {
-          (Disjoint.Left)(p.codec.readValue(tokens.asParser(), leftType))
+        val leftValue = try {
+          p.codec.readValue<A?>(tokens.asParser(), leftType)
         } catch (_: JsonProcessingException) {
-          (Disjoint.Right)(p.codec.readValue(tokens.asParser(), rightType))
+          null
+        }
+        if (leftValue != null) {
+          (Disjoint.Left)(leftValue)
+        } else {
+          p.codec.readValue<B?>(tokens.asParser(), rightType)?.let { (Disjoint.Right)(it) }
         }
       }
 
   private
   fun <A : Any, B : Any> createDisjointRight(
       p: JsonParser, context: DeserializationContext, leftType: JavaType, rightType: JavaType
-  ): Disjoint.Right<A, B> =
+  ): Disjoint.Right<A, B>? =
       TokenBuffer(p).deserialize(p, context).let { tokens ->
-        try {
-          p.codec.readValue<Any>(tokens.asParser(), leftType)
+        val isLeft = try {
+          p.codec.readValue<Any?>(tokens.asParser(), leftType) != null
         } catch (_: JsonProcessingException) {
-          return (Disjoint.Right)(p.codec.readValue(tokens.asParser(), rightType))
+          false
         }
-        val message = "$rightType expected, but $leftType (${tokens.asParser().readValueAsTree<TreeNode>()}) was found"
-        throwInputMismatch(context, message)
+        if (isLeft) {
+          throwInputMismatch(
+              context,
+              "$rightType expected, but $leftType (${tokens.asParser().readValueAsTree<TreeNode>()}) was found"
+          )
+        } else {
+          p.codec.readValue<B?>(tokens.asParser(), rightType)?.let { (Disjoint.Right)(it) }
+        }
       }
 }
