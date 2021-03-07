@@ -37,10 +37,8 @@ internal
 object DoubleDeserializer : BaseDeserializer<Double>() {
   override
   fun invoke(p: JsonParser, context: DeserializationContext) =
-      p.doubleValue.let { parsed ->
-        if (BigDecimal(parsed).compareTo(p.decimalValue) == 0) {
-          parsed
-        } else {
+      p.doubleValue.also { parsed ->
+        if (BigDecimal(parsed).compareTo(p.decimalValue) != 0) {
           val message = "DOUBLE expected, but BIG_DECIMAL (${p.decimalValue}) was found"
           throwInputMismatch(context, message)
         }
@@ -52,10 +50,8 @@ internal
 object FloatDeserializer : BaseDeserializer<Float>() {
   override
   fun invoke(p: JsonParser, context: DeserializationContext) =
-      p.floatValue.let { parsed ->
-        if (BigDecimal(parsed.toDouble()).compareTo(p.decimalValue) == 0) {
-          parsed
-        } else {
+      p.floatValue.also { parsed ->
+        if (BigDecimal(parsed.toDouble()).compareTo(p.decimalValue) != 0) {
           val message = "FLOAT expected, but DOUBLE or BIG_DECIMAL (${p.decimalValue}) was found"
           throwInputMismatch(context, message)
         }
@@ -117,14 +113,10 @@ object ShortDeserializer : BaseDeserializer<Short>() {
   override
   fun invoke(p: JsonParser, context: DeserializationContext) =
       when (p.currentToken()) {
-        VALUE_NUMBER_INT -> p.intValue.let { intValue ->
-          val parsed = intValue.toShort()
-
-          if (parsed.toInt() == intValue) {
-            parsed
-          } else {
-            val message = "SHORT expected, but INT ($intValue) was found"
-            throwInputMismatch(context, message)
+        VALUE_NUMBER_INT -> p.intValue.toShort().also { parsed ->
+          if (parsed.toInt() != p.intValue) {
+              val message = "SHORT expected, but INT (${p.intValue}) was found"
+              throwInputMismatch(context, message)
           }
         }
         VALUE_NUMBER_FLOAT -> try {
@@ -142,14 +134,10 @@ object ByteDeserializer : BaseDeserializer<Byte>() {
   override
   fun invoke(p: JsonParser, context: DeserializationContext) =
       when (p.currentToken()) {
-        VALUE_NUMBER_INT -> p.intValue.let { intValue ->
-          val parsed = intValue.toByte()
-
-          if (parsed.toInt() == intValue) {
-            parsed
-          } else {
-            val message = "BYTE expected, but INT ($intValue) was found"
-            throwInputMismatch(context, message)
+        VALUE_NUMBER_INT -> p.intValue.toByte().also { parsed ->
+          if (parsed.toInt() != p.intValue) {
+              val message = "BYTE expected, but SHORT or INT (${p.intValue}) was found"
+              throwInputMismatch(context, message)
           }
         }
         VALUE_NUMBER_FLOAT -> try {

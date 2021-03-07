@@ -18,11 +18,11 @@ internal
 object CharDeserializer : ExpectedTokenDeserializer<Char>(VALUE_STRING) {
   override
   fun invoke(p: JsonParser, context: DeserializationContext) =
-      p.valueAsString.let { parsed ->
-        if (parsed.length == 1) {
-          parsed[0]
+      p.valueAsString.let { stringValue ->
+        if (stringValue.length == 1) {
+          stringValue[0]
         } else {
-          val message = "CHAR expected, but STRING ($parsed) was found"
+          val message = "CHAR expected, but STRING ($stringValue) was found"
           throwInputMismatch(context, message)
         }
       }

@@ -27,10 +27,8 @@ internal
 object ShortenExclusiveDoubleDeserializer : BaseDeserializer<Double>() {
   override
   fun invoke(p: JsonParser, context: DeserializationContext) =
-      p.doubleValue.let { parsed ->
-        if (BigDecimal(parsed.toString()).compareTo(p.decimalValue) == 0) {
-          parsed
-        } else {
+      p.doubleValue.also { parsed ->
+        if (BigDecimal(parsed.toString()).compareTo(p.decimalValue) != 0) {
           val message = "DOUBLE expected, but BIG_DECIMAL (${p.decimalValue}) was found"
           throwInputMismatch(context, message)
         }
@@ -42,10 +40,8 @@ internal
 object ShortenExclusiveFloatDeserializer : BaseDeserializer<Float>() {
   override
   fun invoke(p: JsonParser, context: DeserializationContext) =
-      p.floatValue.let { parsed ->
-        if (BigDecimal(parsed.toString()).compareTo(p.decimalValue) == 0) {
-          parsed
-        } else {
+      p.floatValue.also { parsed ->
+        if (BigDecimal(parsed.toString()).compareTo(p.decimalValue) != 0) {
           val message = "FLOAT expected, but DOUBLE or BIG_DECIMAL (${p.decimalValue}) was found"
           throwInputMismatch(context, message)
         }

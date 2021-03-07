@@ -49,9 +49,9 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
     override fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (B) -> S) =
         Unresolved(rightTransform(value))
 
-    override fun hashCode() = 0x6c49acc3 + right.hashCode()
-    override fun equals(other: Any?) = other is Right<*, *> && right == other.right
-    override fun toString() = "Disjoint.right($right)"
+    override fun hashCode() = 0x6c49acc3 + value.hashCode()
+    override fun equals(other: Any?) = other is Right<*, *> && value == other.value
+    override fun toString() = "Disjoint.right($value)"
 
     companion object {
       @JvmSynthetic
@@ -73,9 +73,9 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
     override fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (Nothing) -> S) =
         Left(leftTransform(value))
 
-    override fun hashCode() = 0x60fc3c14 + left.hashCode()
-    override fun equals(other: Any?) = other is Left<*> && left == other.left
-    override fun toString() = "Disjoint.left($left)"
+    override fun hashCode() = 0x60fc3c14 + value.hashCode()
+    override fun equals(other: Any?) = other is Left<*> && value == other.value
+    override fun toString() = "Disjoint.left($value)"
 
     companion object {
       @JvmStatic
