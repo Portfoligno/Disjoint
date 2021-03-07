@@ -15,7 +15,7 @@ import io.github.portfoligno.json.disjoint.Disjoint.Left
 import io.github.portfoligno.json.disjoint.Disjoint.Right
 import io.github.portfoligno.json.disjoint.DisjointSource
 import io.github.portfoligno.json.disjoint.DisjointSource.Unresolved
-import io.github.portfoligno.json.disjoint.utility.JvmPackagePrivate
+import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 
 private
 fun JsonDeserializer<*>.throwInputMismatch(context: DeserializationContext, message: String): Nothing =

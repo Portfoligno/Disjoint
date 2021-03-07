@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.util.TokenBuffer
-import io.github.portfoligno.json.disjoint.utility.JvmPackagePrivate
+import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 
 internal
 typealias Deserializer<A> = com.fasterxml.jackson.databind.JsonDeserializer<A>

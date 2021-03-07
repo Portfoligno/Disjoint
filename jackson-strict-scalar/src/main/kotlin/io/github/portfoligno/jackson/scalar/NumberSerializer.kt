@@ -3,7 +3,7 @@ package io.github.portfoligno.jackson.scalar
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import io.github.portfoligno.json.disjoint.utility.JvmPackagePrivate
+import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 import java.math.BigDecimal
 
 @JvmPackagePrivate

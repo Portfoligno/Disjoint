@@ -1,4 +1,4 @@
-package io.github.portfoligno.json.disjoint.utility
+package io.github.portfoligno.json.disjoint.utility.jvm
 
 import kotlin.annotation.AnnotationRetention.BINARY
 import kotlin.annotation.AnnotationTarget.*

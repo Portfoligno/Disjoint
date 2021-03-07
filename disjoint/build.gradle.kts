@@ -8,7 +8,7 @@ plugins {
 tasks["jar"].doLast {
   removePublicModifiers(
       classPath = "io/github/portfoligno/json/disjoint",
-      annotationDescriptor = "Lio/github/portfoligno/json/disjoint/utility/JvmPackagePrivate;"
+      annotationDescriptor = "Lio/github/portfoligno/json/disjoint/utility/jvm/JvmPackagePrivate;"
   )
 }
 

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import io.github.portfoligno.json.disjoint.Disjoint.Companion.value
 import io.github.portfoligno.json.disjoint.DisjointSource
-import io.github.portfoligno.json.disjoint.utility.JvmPackagePrivate
+import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 
 @JvmPackagePrivate
 internal

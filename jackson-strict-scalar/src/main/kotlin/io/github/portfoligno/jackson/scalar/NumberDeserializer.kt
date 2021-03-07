@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonParser.NumberType.*
 import com.fasterxml.jackson.core.JsonToken.VALUE_NUMBER_FLOAT
 import com.fasterxml.jackson.core.JsonToken.VALUE_NUMBER_INT
 import com.fasterxml.jackson.databind.DeserializationContext
-import io.github.portfoligno.json.disjoint.utility.JvmPackagePrivate
+import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 import java.math.BigDecimal
 import java.math.BigInteger
 

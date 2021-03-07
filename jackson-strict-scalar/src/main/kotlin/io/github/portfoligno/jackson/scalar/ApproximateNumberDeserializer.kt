@@ -2,7 +2,7 @@ package io.github.portfoligno.jackson.scalar
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
-import io.github.portfoligno.json.disjoint.utility.JvmPackagePrivate
+import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 import java.math.BigDecimal
 
 @JvmPackagePrivate

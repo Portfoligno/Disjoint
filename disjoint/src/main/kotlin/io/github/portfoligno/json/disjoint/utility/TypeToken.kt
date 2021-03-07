@@ -3,6 +3,7 @@
 package io.github.portfoligno.json.disjoint.utility
 
 import com.fasterxml.jackson.core.type.TypeReference
+import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
