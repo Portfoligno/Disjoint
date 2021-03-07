@@ -85,9 +85,6 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
   }
 
   companion object {
-    @get:JvmSynthetic
-    val Unresolved get() = DisjointSource.Unresolved
-
     @JvmStatic
     fun <A : Any, B : Any> unresolved(value: B): DisjointSource<A, B> = Unresolved(value)
 

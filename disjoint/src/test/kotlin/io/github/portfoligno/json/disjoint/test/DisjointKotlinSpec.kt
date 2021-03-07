@@ -18,14 +18,11 @@ class DisjointKotlinSpec : StringSpec({
   val m = ObjectMapper().registerModule(StrictScalarModule())
   val codec = m.toDisjointCodec()
 
-  "`Disjoint.Unresolved` should work" {
-    Disjoint.Unresolved(10.0) shouldBe (DisjointSource.Unresolved)(10.0)
-  }
   "Resolution as `left` should work" {
-    Disjoint.Unresolved(10.0).resolveWith<Int>(codec).left shouldBe 10
+    DisjointSource.Unresolved(10.0).resolveWith<Int>(codec).left shouldBe 10
   }
   "Resolution as `right` should work" {
-    Disjoint.Unresolved("10.0").resolveWith<Int>(codec).right shouldBe "10.0"
+    DisjointSource.Unresolved("10.0").resolveWith<Int>(codec).right shouldBe "10.0"
   }
   "Deserialization as `right` should work" {
     m.readValue<Disjoint<List<String>, List<Int>>>("[2, 2]").right shouldBe listOf(2, 2)
@@ -51,10 +48,10 @@ class DisjointKotlinSpec : StringSpec({
     }
   }
   "Serialization from `unresolved` should work" {
-    m.writeValueAsString(Disjoint.Unresolved(10.0)) shouldBe "10.0"
+    m.writeValueAsString(DisjointSource.Unresolved(10.0)) shouldBe "10.0"
   }
   "Serialization from `right` should work" {
-    m.writeValueAsString(Disjoint.Unresolved(10.0).resolveWith<String>(codec)) shouldBe "10.0"
+    m.writeValueAsString(DisjointSource.Unresolved(10.0).resolveWith<String>(codec)) shouldBe "10.0"
   }
   "Serialization from `left` should work" {
     m.writeValueAsString(Disjoint.Left(10.0)) shouldBe "10.0"
