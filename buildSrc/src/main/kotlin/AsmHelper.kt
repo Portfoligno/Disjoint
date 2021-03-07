@@ -36,20 +36,12 @@ fun Project.removePublicModifiers(
             cls.accept(writer)
             Files.write(path, writer.toByteArray(), StandardOpenOption.TRUNCATE_EXISTING)
           }
-          fun isTarget(a: List<AnnotationNode>?) = a != null && a.any { it.desc == annotationDescriptor }
+          fun isTarget(a: List<AnnotationNode>?) =
+              a != null && a.any { it.desc == annotationDescriptor }
 
           if (isTarget(cls.invisibleAnnotations)) {
             cls.access = cls.access and Opcodes.ACC_PUBLIC.inv()
             overwrite()
-          } else {
-            val methods = cls.methods.filter { isTarget(it.invisibleAnnotations) }
-
-            if (methods.isNotEmpty()) {
-              methods.forEach {
-                it.access = it.access and Opcodes.ACC_PUBLIC.inv()
-              }
-              overwrite()
-            }
           }
         }
   }

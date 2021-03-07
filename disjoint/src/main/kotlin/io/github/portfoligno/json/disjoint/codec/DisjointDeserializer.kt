@@ -11,7 +11,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import com.fasterxml.jackson.databind.util.TokenBuffer
 import io.github.portfoligno.json.disjoint.Disjoint
+import io.github.portfoligno.json.disjoint.Disjoint.Left
+import io.github.portfoligno.json.disjoint.Disjoint.Right
 import io.github.portfoligno.json.disjoint.DisjointSource
+import io.github.portfoligno.json.disjoint.DisjointSource.Unresolved
 import io.github.portfoligno.json.disjoint.utility.JvmPackagePrivate
 
 private
@@ -48,11 +51,11 @@ class DisjointDeserializer : JsonDeserializer<DisjointSource<Any, Any>>(), Conte
   ): DisjointSource<Any, Any>? =
       contextualType.run {
         when (rawClass.kotlin) {
-          DisjointSource.Unresolved::class ->
-            p.codec.readValue<Any?>(p, bindings.typeParameters[0])?.let { (DisjointSource.Unresolved)(it) }
-          Disjoint.Left::class ->
-            p.codec.readValue<Any?>(p, bindings.typeParameters[0])?.let { (Disjoint.Left)(it) }
-          Disjoint.Right::class ->
+          Unresolved::class ->
+            p.codec.readValue<Any?>(p, bindings.typeParameters[0])?.let { Unresolved(it) }
+          Left::class ->
+            p.codec.readValue<Any?>(p, bindings.typeParameters[0])?.let { Left(it) }
+          Right::class ->
             createDisjointRight(p, context, bindings.typeParameters[0], bindings.typeParameters[1])
           else ->
             createDisjoint(p, context, bindings.typeParameters[0], bindings.typeParameters[1])
@@ -70,16 +73,16 @@ class DisjointDeserializer : JsonDeserializer<DisjointSource<Any, Any>>(), Conte
           null
         }
         if (leftValue != null) {
-          (Disjoint.Left)(leftValue)
+          Left(leftValue)
         } else {
-          p.codec.readValue<B?>(tokens.asParser(), rightType)?.let { (Disjoint.Right)(it) }
+          p.codec.readValue<B?>(tokens.asParser(), rightType)?.let { Right(it) }
         }
       }
 
   private
   fun <A : Any, B : Any> createDisjointRight(
       p: JsonParser, context: DeserializationContext, leftType: JavaType, rightType: JavaType
-  ): Disjoint.Right<A, B>? =
+  ): Right<A, B>? =
       TokenBuffer(p).deserialize(p, context).let { tokens ->
         val isLeft = try {
           p.codec.readValue<Any?>(tokens.asParser(), leftType) != null
@@ -92,7 +95,7 @@ class DisjointDeserializer : JsonDeserializer<DisjointSource<Any, Any>>(), Conte
               "$rightType expected, but $leftType (${tokens.asParser().readValueAsTree<TreeNode>()}) was found"
           )
         } else {
-          p.codec.readValue<B?>(tokens.asParser(), rightType)?.let { (Disjoint.Right)(it) }
+          p.codec.readValue<B?>(tokens.asParser(), rightType)?.let { Right(it) }
         }
       }
 }

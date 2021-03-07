@@ -12,7 +12,7 @@ interface DisjointCodec {
   fun <T : Any> convertOrNull(value: Any?, type: TypeToken<T>): T?
 
   fun <A : Any, B : Any> resolve(source: Unresolved<B>, leftType: TypeToken<A>) =
-        convertOrNull(source.value, leftType)?.let(Left.Companion::invoke) ?: (Right)(source.value)
+        convertOrNull(source.value, leftType)?.let { Left(it) } ?: Right(source.value)
 
   fun <A : Any, B : Any> resolveSource(source: DisjointSource<A, B>, leftType: TypeToken<A>) =
       when (source) {

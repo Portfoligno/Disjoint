@@ -6,15 +6,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import io.github.portfoligno.json.disjoint.codec.DisjointCodec
 import io.github.portfoligno.json.disjoint.codec.DisjointDeserializer
 import io.github.portfoligno.json.disjoint.codec.DisjointSerializer
-import io.github.portfoligno.json.disjoint.utility.JvmPackagePrivate
 import io.github.portfoligno.json.disjoint.utility.typeTokenOf
-import io.github.portfoligno.json.disjoint.utility.jvmPackagePrivateWarning as w
-import kotlin.Deprecated as D
 
 @JsonDeserialize(using = DisjointDeserializer::class)
 @JsonSerialize(using = DisjointSerializer::class)
 sealed class DisjointSource<out A : Any, out B : Any> {
-  class Unresolved<B : Any> @D(w) @JvmPackagePrivate internal constructor (val value: B) : DisjointSource<Nothing, B>() {
+  class Unresolved<B : Any> private constructor (val value: B) : DisjointSource<Nothing, B>() {
     inline fun <reified A : Any> resolveWith(codec: DisjointCodec) =
         codec.resolve(this, typeTokenOf<A>())
 
@@ -39,7 +36,7 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
   abstract fun <R : Any> mapLeft(transform: (A) -> R): DisjointSource<R, B>
   abstract fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (B) -> S): DisjointSource<R, S>
 
-  class Right<A : Any, B : Any> @D(w) @JvmPackagePrivate internal constructor (val value: B) : Disjoint<A, B>() {
+  class Right<A : Any, B : Any> private constructor (val value: B) : Disjoint<A, B>() {
     override val left: Nothing? get() = null
     override val right get() = value
 
@@ -63,7 +60,7 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
     }
   }
 
-  class Left<A : Any> @D(w) @JvmPackagePrivate internal constructor (val value: A) : Disjoint<A, Nothing>() {
+  class Left<A : Any> private constructor (val value: A) : Disjoint<A, Nothing>() {
     override val left get() = value
     override val right get() = null
 
@@ -72,9 +69,9 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
     override fun <R : Any> mapRight(transform: (Nothing) -> R) =
         this
     override fun <R : Any> mapLeft(transform: (A) -> R) =
-        (Left)(transform(value))
+        Left(transform(value))
     override fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (Nothing) -> S) =
-        (Left)(leftTransform(value))
+        Left(leftTransform(value))
 
     override fun hashCode() = 0x60fc3c14 + left.hashCode()
     override fun equals(other: Any?) = other is Left<*> && left == other.left
@@ -95,7 +92,7 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
     fun <A : Any, B : Any> unresolved(value: B): DisjointSource<A, B> = Unresolved(value)
 
     @JvmStatic
-    fun <A : Any, B : Any> left(value: A): Disjoint<A, B> = (Left)(value)
+    fun <A : Any, B : Any> left(value: A): Disjoint<A, B> = Left(value)
 
     inline fun <reified A : Any, B : Any> DisjointSource<A, B>.resolveWith(codec: DisjointCodec) =
         codec.resolveSource(this, typeTokenOf())
@@ -118,7 +115,7 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
     @JvmStatic
     @JvmName("swapRight")
     fun <B : Any> Right<*, B>.swap() =
-        (Left)(value)
+        Left(value)
 
     @JvmStatic
     @JvmName("swapLeft")

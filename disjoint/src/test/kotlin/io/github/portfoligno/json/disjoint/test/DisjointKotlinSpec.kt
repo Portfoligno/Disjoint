@@ -57,7 +57,7 @@ class DisjointKotlinSpec : StringSpec({
     m.writeValueAsString(Disjoint.Unresolved(10.0).resolveWith<String>(codec)) shouldBe "10.0"
   }
   "Serialization from `left` should work" {
-    m.writeValueAsString((Disjoint.Left)(10.0)) shouldBe "10.0"
+    m.writeValueAsString(Disjoint.Left(10.0)) shouldBe "10.0"
   }
 
   "Deserialization as `left` of `NullNode` should work" {
