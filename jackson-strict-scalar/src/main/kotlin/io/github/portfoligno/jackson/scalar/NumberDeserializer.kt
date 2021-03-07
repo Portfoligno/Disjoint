@@ -114,8 +114,6 @@ object IntDeserializer : BaseDeserializer<Int>() {
 @JvmPackagePrivate
 internal
 object ShortDeserializer : BaseDeserializer<Short>() {
-  private const val mask = 0xffff0000.toInt()
-
   override
   fun invoke(p: JsonParser, context: DeserializationContext) =
       when (p.currentToken()) {
@@ -141,8 +139,6 @@ object ShortDeserializer : BaseDeserializer<Short>() {
 @JvmPackagePrivate
 internal
 object ByteDeserializer : BaseDeserializer<Byte>() {
-  private const val mask = 0xffffff00.toInt()
-
   override
   fun invoke(p: JsonParser, context: DeserializationContext) =
       when (p.currentToken()) {
