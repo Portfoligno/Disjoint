@@ -2,7 +2,6 @@
 package io.github.portfoligno.json.decode.codec
 
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.BeanProperty
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JavaType
@@ -18,6 +17,13 @@ import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 private
 fun JsonDeserializer<*>.throwInputMismatch(context: DeserializationContext, message: String): Nothing =
     context.reportInputMismatch(this, message)
+
+private
+fun Throwable.throwIfCritical(): Unit =
+    when (this) {
+      is ThreadDeath, is VirtualMachineError -> throw this
+      else -> Unit
+    }
 
 
 @JvmPackagePrivate
@@ -50,8 +56,9 @@ class DecodingResultDeserializer : JsonDeserializer<DecodingResult<Any>>(), Cont
           Failure::class ->
             try {
               throwInputMismatch(context, "Failure requested")
-            } catch (e: JsonProcessingException) {
-              Failure(p.codec.readValue(p, Json::class.java), Nothing::class.java, e)
+            } catch (t: Throwable) {
+              t.throwIfCritical()
+              Failure(p.codec.readValue(p, Json::class.java), Nothing::class.java, t)
             }
           Success::class ->
             createSuccess(p, context, bindings.typeParameters[0])
@@ -67,8 +74,9 @@ class DecodingResultDeserializer : JsonDeserializer<DecodingResult<Any>>(), Cont
       TokenBuffer(p).deserialize(p, context).let { tokens ->
         try {
           createSuccess(tokens.asParser(), context, type)
-        } catch (e: JsonProcessingException) {
-          Failure(p.codec.readValue(p, Json::class.java), type, e)
+        } catch (t: Throwable) {
+          t.throwIfCritical()
+          Failure(p.codec.readValue(p, Json::class.java), type, t)
         }
       }
 

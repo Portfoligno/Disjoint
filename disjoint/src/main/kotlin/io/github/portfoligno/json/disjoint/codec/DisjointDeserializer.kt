@@ -2,7 +2,6 @@
 package io.github.portfoligno.json.disjoint.codec
 
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.BeanProperty
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -20,6 +19,13 @@ import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 private
 fun JsonDeserializer<*>.throwInputMismatch(context: DeserializationContext, message: String): Nothing =
     context.reportInputMismatch(this, message)
+
+private
+fun Throwable.throwIfCritical(): Unit =
+    when (this) {
+      is ThreadDeath, is VirtualMachineError -> throw this
+      else -> Unit
+    }
 
 
 @JvmPackagePrivate
@@ -69,7 +75,8 @@ class DisjointDeserializer : JsonDeserializer<DisjointSource<Any, Any>>(), Conte
       TokenBuffer(p).deserialize(p, context).let { tokens ->
         val leftValue = try {
           p.codec.readValue<A?>(tokens.asParser(), leftType)
-        } catch (_: JsonProcessingException) {
+        } catch (t: Throwable) {
+          t.throwIfCritical()
           null
         }
         if (leftValue != null) {
@@ -86,7 +93,8 @@ class DisjointDeserializer : JsonDeserializer<DisjointSource<Any, Any>>(), Conte
       TokenBuffer(p).deserialize(p, context).let { tokens ->
         val isLeft = try {
           p.codec.readValue<Any?>(tokens.asParser(), leftType) != null
-        } catch (_: JsonProcessingException) {
+        } catch (t: Throwable) {
+          t.throwIfCritical()
           false
         }
         if (isLeft) {
