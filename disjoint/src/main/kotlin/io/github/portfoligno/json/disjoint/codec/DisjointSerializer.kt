@@ -9,7 +9,7 @@ import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 
 @JvmPackagePrivate
 internal
-object DisjointSerializer : JsonSerializer<DisjointSource<*, *>>() {
+class DisjointSerializer : JsonSerializer<DisjointSource<*, *>>() {
   override
   fun serialize(value: DisjointSource<*, *>, gen: JsonGenerator, serializers: SerializerProvider) =
       gen.writeObject(value.value)
