@@ -20,5 +20,5 @@ dependencies {
   compileOnly(project(":utility"))
 
   api("io.github.portfoligno", "jackson-immutable-ast", "1.4.1")
-  implementation("com.fasterxml.jackson.core", "jackson-databind")
+  compileOnly("com.fasterxml.jackson.core", "jackson-databind")
 }
