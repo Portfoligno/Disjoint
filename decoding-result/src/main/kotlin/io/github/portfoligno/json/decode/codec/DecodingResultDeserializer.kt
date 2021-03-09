@@ -8,7 +8,8 @@ import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import com.fasterxml.jackson.databind.util.TokenBuffer
-import io.github.portfoligno.json.ast.Json
+import io.github.portfoligno.json.ast.JsonNonNull
+import io.github.portfoligno.json.ast.JsonNull
 import io.github.portfoligno.json.decode.DecodingResult
 import io.github.portfoligno.json.decode.DecodingResult.Failure
 import io.github.portfoligno.json.decode.DecodingResult.Success
@@ -58,7 +59,7 @@ class DecodingResultDeserializer : JsonDeserializer<DecodingResult<Any>>(), Cont
               throwInputMismatch(context, "Failure requested")
             } catch (t: Throwable) {
               t.throwIfCritical()
-              Failure(p.codec.readValue(p, Json::class.java), Nothing::class.java, t)
+              Failure(p.codec.readValue(p, JsonNonNull::class.java) ?: JsonNull, Nothing::class.java, t)
             }
           Success::class ->
             createSuccess(p, context, bindings.typeParameters[0])
@@ -76,7 +77,7 @@ class DecodingResultDeserializer : JsonDeserializer<DecodingResult<Any>>(), Cont
           createSuccess(tokens.asParser(), context, type)
         } catch (t: Throwable) {
           t.throwIfCritical()
-          Failure(p.codec.readValue(p, Json::class.java), type, t)
+          Failure(p.codec.readValue(p, JsonNonNull::class.java) ?: JsonNull, type, t)
         }
       }
 
