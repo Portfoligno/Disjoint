@@ -76,7 +76,7 @@ class DecodingResultDeserializer : JsonDeserializer<DecodingResult<Any>>(), Cont
           createSuccess(tokens.asParser(), context, type)
         } catch (t: Throwable) {
           t.throwIfCritical()
-          Failure(p.codec.readValue(p, Json::class.java), type, t)
+          Failure(p.codec.readValue(tokens.asParser(), Json::class.java), type, t)
         }
       }
 
