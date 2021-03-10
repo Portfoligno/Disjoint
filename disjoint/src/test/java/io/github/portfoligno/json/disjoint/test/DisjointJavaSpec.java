@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.portfoligno.jackson.scalar.StrictScalarModule;
 import io.github.portfoligno.json.disjoint.Disjoint;
-import io.github.portfoligno.json.disjoint.DisjointSource;
+import io.github.portfoligno.json.disjoint.Union;
+import io.github.portfoligno.json.disjoint.UnresolvedRight;
 import io.github.portfoligno.json.disjoint.codec.DisjointCodec;
 import io.github.portfoligno.json.disjoint.test.utility.StringSpec;
 import io.github.portfoligno.json.disjoint.utility.TypeToken;
@@ -20,20 +21,20 @@ public class DisjointJavaSpec extends StringSpec {{
 
   describe("`resolve` should work", () -> assertEquals(
       Disjoint.Right.class,
-      c.resolve(DisjointSource.Unresolved.of(""), new TypeToken<List<String>>() { }).getClass()
+      c.resolve(UnresolvedRight.of(""), new TypeToken<List<String>>() { }).getClass()
   ));
   describe("`resolveSource` should work", () -> assertEquals(
       Disjoint.Right.class,
-      c.resolveSource(Disjoint.unresolved(1), new TypeToken<String>() { }).getClass()
+      c.resolveSource(Disjoint.unresolvedRight(1), new TypeToken<String>() { }).getClass()
   ));
   describe("`mapRight` should work", () -> {
-    DisjointSource<String, Integer> v =
-        c.resolveSource(Disjoint.unresolved(1), new TypeToken<String>() { }).mapRight(i -> i + 1);
+    Union<String, Integer> v =
+        c.resolveSource(Disjoint.unresolvedRight(1), new TypeToken<String>() { }).mapRight(i -> i + 1);
 
-    assertEquals(Disjoint.unresolved(2), v);
+    assertEquals(Disjoint.unresolvedRight(2), v);
   });
   describe("`swap` should work", () -> assertEquals(
-    Disjoint.unresolved(5),
+    Disjoint.unresolvedRight(5),
     Disjoint.swap(Disjoint.left(5))
   ));
   describe("README example should work", () -> {

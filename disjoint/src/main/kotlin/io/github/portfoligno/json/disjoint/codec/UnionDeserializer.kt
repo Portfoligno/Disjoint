@@ -12,8 +12,8 @@ import com.fasterxml.jackson.databind.util.TokenBuffer
 import io.github.portfoligno.json.disjoint.Disjoint
 import io.github.portfoligno.json.disjoint.Disjoint.Left
 import io.github.portfoligno.json.disjoint.Disjoint.Right
-import io.github.portfoligno.json.disjoint.DisjointSource
-import io.github.portfoligno.json.disjoint.DisjointSource.Unresolved
+import io.github.portfoligno.json.disjoint.Union
+import io.github.portfoligno.json.disjoint.UnresolvedRight
 import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 
 private
@@ -30,35 +30,35 @@ fun Throwable.throwIfCritical(): Unit =
 
 @JvmPackagePrivate
 internal
-class DisjointDeserializer : JsonDeserializer<DisjointSource<Any, Any>>(), ContextualDeserializer {
+class UnionDeserializer : JsonDeserializer<Union<Any, Any>>(), ContextualDeserializer {
   override
   fun createContextual(ctxt: DeserializationContext, property: BeanProperty?): JsonDeserializer<*> =
       when (val t = ctxt.contextualType) {
         null -> this
-        else -> object : JsonDeserializer<DisjointSource<Any, Any>>() {
+        else -> object : JsonDeserializer<Union<Any, Any>>() {
           override
-          fun deserialize(p: JsonParser, ctxt: DeserializationContext): DisjointSource<Any, Any> =
+          fun deserialize(p: JsonParser, ctxt: DeserializationContext): Union<Any, Any> =
               typedDeserialize(p, t, ctxt)!!
 
           override
-          fun getNullValue(ctxt: DeserializationContext): DisjointSource<Any, Any>? =
+          fun getNullValue(ctxt: DeserializationContext): Union<Any, Any>? =
               typedDeserialize(ctxt.parser, t, ctxt)
         }
       }
 
   override
-  fun deserialize(p: JsonParser, ctxt: DeserializationContext): DisjointSource<Any, Any> =
+  fun deserialize(p: JsonParser, ctxt: DeserializationContext): Union<Any, Any> =
       ctxt.typeFactory.constructType(Any::class.java).let {
         createDisjoint(p, ctxt, it, it)!!
       }
 
   fun typedDeserialize(
       p: JsonParser, contextualType: JavaType, context: DeserializationContext
-  ): DisjointSource<Any, Any>? =
+  ): Union<Any, Any>? =
       contextualType.run {
         when (rawClass.kotlin) {
-          Unresolved::class ->
-            p.codec.readValue<Any?>(p, bindings.typeParameters[0])?.let { Unresolved(it) }
+          UnresolvedRight::class ->
+            p.codec.readValue<Any?>(p, bindings.typeParameters[0])?.let { UnresolvedRight(it) }
           Left::class ->
             p.codec.readValue<Any?>(p, bindings.typeParameters[0])?.let { Left(it) }
           Right::class ->

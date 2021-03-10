@@ -4,37 +4,37 @@ package io.github.portfoligno.json.disjoint
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import io.github.portfoligno.json.disjoint.codec.DisjointCodec
-import io.github.portfoligno.json.disjoint.codec.DisjointDeserializer
-import io.github.portfoligno.json.disjoint.codec.DisjointSerializer
+import io.github.portfoligno.json.disjoint.codec.UnionDeserializer
+import io.github.portfoligno.json.disjoint.codec.UnionSerializer
 import io.github.portfoligno.json.disjoint.utility.typeTokenOf
 
-@JsonDeserialize(using = DisjointDeserializer::class)
-@JsonSerialize(using = DisjointSerializer::class)
-sealed class DisjointSource<out A : Any, out B : Any> {
-  class Unresolved<out B : Any> private constructor (val value: B) : DisjointSource<Nothing, B>() {
-    inline fun <reified A : Any> resolveWith(codec: DisjointCodec) =
-        codec.resolve(this, typeTokenOf<A>())
+@JsonDeserialize(using = UnionDeserializer::class)
+@JsonSerialize(using = UnionSerializer::class)
+sealed class Union<out A : Any, out B : Any>
 
-    override fun hashCode() = 0x19085cbf + value.hashCode()
-    override fun equals(other: Any?) = other is Unresolved<*> && value == other.value
-    override fun toString() = "Disjoint.unresolved($value)"
+class UnresolvedRight<out B : Any> private constructor (val value: B) : Union<Nothing, B>() {
+  inline fun <reified A : Any> resolveWith(codec: DisjointCodec) =
+      codec.resolve(this, typeTokenOf<A>())
 
-    companion object {
-      @JvmStatic
-      @JvmName("of")
-      operator fun <B : Any> invoke(value: B) = Unresolved(value)
-    }
+  override fun hashCode() = 0x19085cbf + value.hashCode()
+  override fun equals(other: Any?) = other is UnresolvedRight<*> && value == other.value
+  override fun toString() = "Disjoint.unresolvedRight($value)"
+
+  companion object {
+    @JvmStatic
+    @JvmName("of")
+    operator fun <B : Any> invoke(value: B) = UnresolvedRight(value)
   }
 }
 
-sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
+sealed class Disjoint<A : Any, out B : Any> : Union<A, B>() {
   abstract val left: A?
   abstract val right: B?
 
   abstract fun <R> fold(leftTransform: (A) -> R, rightTransform: (B) -> R): R
-  abstract fun <R : Any> mapRight(transform: (B) -> R): DisjointSource<A, R>
-  abstract fun <R : Any> mapLeft(transform: (A) -> R): DisjointSource<R, B>
-  abstract fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (B) -> S): DisjointSource<R, S>
+  abstract fun <R : Any> mapRight(transform: (B) -> R): Union<A, R>
+  abstract fun <R : Any> mapLeft(transform: (A) -> R): Union<R, B>
+  abstract fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (B) -> S): Union<R, S>
 
   // While serialization in Jackson regards only run-time type, i.e. contravariant serializers only,
   // this definition intends to address invariant serializers too.
@@ -46,11 +46,11 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
     override fun <R> fold(leftTransform: (A) -> R, rightTransform: (B) -> R) =
         rightTransform(value)
     override fun <R : Any> mapRight(transform: (B) -> R) =
-        Unresolved(transform(value))
+        UnresolvedRight(transform(value))
     override fun <R : Any> mapLeft(transform: (A) -> R) =
-        Unresolved(value)
+        UnresolvedRight(value)
     override fun <R : Any, S : Any> bimap(leftTransform: (A) -> R, rightTransform: (B) -> S) =
-        Unresolved(rightTransform(value))
+        UnresolvedRight(rightTransform(value))
 
     override fun hashCode() = 0x6c49acc3 + value.hashCode()
     override fun equals(other: Any?) = other is Right<*, *> && value == other.value
@@ -89,20 +89,20 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
 
   companion object {
     @JvmStatic
-    fun <A : Any, B : Any> unresolved(value: B): DisjointSource<A, B> = Unresolved(value)
+    fun <A : Any, B : Any> unresolvedRight(value: B): Union<A, B> = UnresolvedRight(value)
 
     @JvmStatic
     fun <A : Any, B : Any> left(value: A): Disjoint<A, B> = Left(value)
 
-    inline fun <reified A : Any, B : Any> DisjointSource<A, B>.resolveWith(codec: DisjointCodec) =
+    inline fun <reified A : Any, B : Any> Union<A, B>.resolveWith(codec: DisjointCodec) =
         codec.resolveSource(this, typeTokenOf())
 
     @JvmStatic
-    val <A : Any> DisjointSource<A, A>.value
+    val <A : Any> Union<A, A>.value
       get() = when (this) {
         is Left -> value
         is Right -> value
-        is Unresolved -> value
+        is UnresolvedRight -> value
       }
 
     @JvmStatic
@@ -120,6 +120,6 @@ sealed class Disjoint<A : Any, out B : Any> : DisjointSource<A, B>() {
     @JvmStatic
     @JvmName("swapLeft")
     fun <A : Any> Left<A>.swap() =
-        Unresolved(value)
+        UnresolvedRight(value)
   }
 }

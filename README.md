@@ -7,22 +7,22 @@ Disjoint
 
 Encodes the concept of disjoint union concerning JSON conversion as a finite-state machine.
 
-Consider the set union `A ∪ B`. There are three states we are interested in:
+Consider a set union `A ∪ B`. There are three states we are interested in:
 
 * `Left` - the set `A` that encompasses all possibilities of the left-hand side type.
 
-* `Unresolved` - the set `B` that encompasses all possibilities of the right-hand side type.
+* `UnresolvedRight` - the set `B` that encompasses all possibilities of the right-hand side type.
 
 * `Right` -  the set difference `B \ A` that encompasses possibilities of the right-hand side type
 while excludes overlaps with the left-hand side.
 
-A `Disjoint<A, B>` type of this library can either be `Left<A>` or `Right<A, B>`.
+A `Disjoint<A, B>` of this library can either be `Left<A>` or `Right<A, B>`.
 It describes the union of type `A` and `B \ A`,
 and is the desired form that can be accessed through a side resolution.
 
-And, a `DisjointSource<A, B>` type that can either be `Disjoint<A, B>` or `Unresolved<B>` is the free form.
-In which `Left` and `Unresolved` can be constructed through provided factory methods.
-An `Unresolved` can be then resolved to `Left` or `Right`, depends on its serialized value.
+A `Union<A, B>`, which can either be `Disjoint<A, B>` or `UnresolvedRight<B>`, is the free form.
+`Left<A>` and `UnresolvedRight<B>` can be constructed through provided factory methods.
+An `UnresolvedRight<B>` can be then resolved to `Left<A>` or `Right<A, B>`, depends on its serialized value.
 
 Only Jackson is supported currently.
 
