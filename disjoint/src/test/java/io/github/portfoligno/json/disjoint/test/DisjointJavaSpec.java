@@ -25,16 +25,16 @@ public class DisjointJavaSpec extends StringSpec {{
   ));
   describe("`resolveSource` should work", () -> assertEquals(
       Disjoint.Right.class,
-      c.resolveSource(Disjoint.unresolvedRight(1), new TypeToken<String>() { }).getClass()
+      c.resolveSource(Union.unresolvedRight(1), new TypeToken<String>() { }).getClass()
   ));
   describe("`mapRight` should work", () -> {
     Union<String, Integer> v =
-        c.resolveSource(Disjoint.unresolvedRight(1), new TypeToken<String>() { }).mapRight(i -> i + 1);
+        c.resolveSource(Union.unresolvedRight(1), new TypeToken<String>() { }).mapRight(i -> i + 1);
 
-    assertEquals(Disjoint.unresolvedRight(2), v);
+    assertEquals(Union.unresolvedRight(2), v);
   });
   describe("`swap` should work", () -> assertEquals(
-    Disjoint.unresolvedRight(5),
+    Union.unresolvedRight(5),
     Disjoint.swap(Disjoint.left(5))
   ));
   describe("README example should work", () -> {

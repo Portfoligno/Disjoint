@@ -1,8 +1,9 @@
-@file:Suppress("MemberVisibilityCanBePrivate")
 package io.github.portfoligno.json.disjoint
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import io.github.portfoligno.json.disjoint.Disjoint.Left
+import io.github.portfoligno.json.disjoint.Disjoint.Right
 import io.github.portfoligno.json.disjoint.codec.DisjointCodec
 import io.github.portfoligno.json.disjoint.codec.UnionDeserializer
 import io.github.portfoligno.json.disjoint.codec.UnionSerializer
@@ -10,7 +11,26 @@ import io.github.portfoligno.json.disjoint.utility.typeTokenOf
 
 @JsonDeserialize(using = UnionDeserializer::class)
 @JsonSerialize(using = UnionSerializer::class)
-sealed class Union<out A : Any, out B : Any>
+sealed class Union<out A : Any, out B : Any> {
+  companion object {
+    @JvmStatic
+    fun <A : Any, B : Any> unresolvedRight(value: B): Union<A, B> = UnresolvedRight(value)
+
+    @JvmStatic
+    fun <A : Any, B : Any> left(value: A): Union<A, B> = Left(value)
+
+    inline fun <reified A : Any, B : Any> Union<A, B>.resolveWith(codec: DisjointCodec) =
+        codec.resolveSource(this, typeTokenOf())
+
+    @JvmStatic
+    val <A : Any> Union<A, A>.value
+      get() = when (this) {
+        is Left -> value
+        is Right -> value
+        is UnresolvedRight -> value
+      }
+  }
+}
 
 class UnresolvedRight<out B : Any> private constructor (val value: B) : Union<Nothing, B>() {
   inline fun <reified A : Any> resolveWith(codec: DisjointCodec) =
@@ -18,7 +38,7 @@ class UnresolvedRight<out B : Any> private constructor (val value: B) : Union<No
 
   override fun hashCode() = 0x19085cbf + value.hashCode()
   override fun equals(other: Any?) = other is UnresolvedRight<*> && value == other.value
-  override fun toString() = "Disjoint.unresolvedRight($value)"
+  override fun toString() = "UnresolvedRight($value)"
 
   companion object {
     @JvmStatic
@@ -89,21 +109,7 @@ sealed class Disjoint<A : Any, out B : Any> : Union<A, B>() {
 
   companion object {
     @JvmStatic
-    fun <A : Any, B : Any> unresolvedRight(value: B): Union<A, B> = UnresolvedRight(value)
-
-    @JvmStatic
     fun <A : Any, B : Any> left(value: A): Disjoint<A, B> = Left(value)
-
-    inline fun <reified A : Any, B : Any> Union<A, B>.resolveWith(codec: DisjointCodec) =
-        codec.resolveSource(this, typeTokenOf())
-
-    @JvmStatic
-    val <A : Any> Union<A, A>.value
-      get() = when (this) {
-        is Left -> value
-        is Right -> value
-        is UnresolvedRight -> value
-      }
 
     @JvmStatic
     fun <A : Any, B : Any> Disjoint<A, B>.swap() =

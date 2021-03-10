@@ -3,8 +3,8 @@ package io.github.portfoligno.json.disjoint.codec
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import io.github.portfoligno.json.disjoint.Disjoint.Companion.value
 import io.github.portfoligno.json.disjoint.Union
+import io.github.portfoligno.json.disjoint.Union.Companion.value
 import io.github.portfoligno.json.disjoint.utility.jvm.JvmPackagePrivate
 
 @JvmPackagePrivate
